@@ -23,18 +23,6 @@ jobs:
       displayName: 'Install React dependencies'
       condition: succeeded()  # This ensures the step only runs if the previous step succeeded
 
-    - script: |
-        cd client
-        npm run build  # Build the React app
-      displayName: 'Build React app'
-      condition: succeeded()  # Only run if 'Install React dependencies' step succeeded
-
-    - script: |
-        mkdir -p app/static  # Ensure static folder exists
-        cp -r client/build/* app/static/  # Move build files to Flask static folder
-      displayName: 'Move React build to Flask static'
-      condition: succeeded()  # Only run if 'Build React app' step succeeded
-
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '3.x'  # Specify the Python version
