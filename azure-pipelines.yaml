@@ -5,14 +5,3 @@ trigger:
 
 pool:
   vmImage: 'ubuntu-latest'
-
-steps:
-  - task: Checkout@1
-    displayName: 'Checkout repository'
-    
-  - script: |
-      lftp -u admin,admin ftp://ftp.anthonybturner.com -e "
-        mirror -R app /home/fmua7eh7xba3/app; 
-        mirror -R client/build /home/fmua7eh7xba3/app/static; 
-        quit"
-    displayName: 'Deploy Flask app to GoDaddy via FTP'
