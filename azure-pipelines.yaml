@@ -46,7 +46,4 @@ steps:
         mirror -R app /home/fmua7eh7xba3/app; 
         mirror -R client/build /home/fmua7eh7xba3/app/static; 
         quit"
-    env:
-      FTP_USERNAME: admin
-      FTP_PASSWORD: admin
     displayName: 'Deploy Flask app to GoDaddy via FTP'
