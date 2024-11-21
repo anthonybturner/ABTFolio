@@ -7,5 +7,5 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-  - task: Checkout@1
+  - task: Checkout@2
     displayName: 'Checkout repository'
