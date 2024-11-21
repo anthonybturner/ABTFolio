@@ -10,24 +10,8 @@ steps:
   - task: Checkout@1
     displayName: 'Checkout repository'
 
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '16.x'
-    displayName: 'Install Node.js'
-
-  - script: |
-      cd client
-      npm install
-    displayName: 'Install React dependencies'
-
-  - script: |
-      cd client
-      npm run build
-    displayName: 'Build React app'
-
   - script: |
       mkdir -p app/static
-      cp -r client/build/* app/static/
     displayName: 'Move React build to Flask static'
 
   - task: UsePythonVersion@0
