@@ -11,6 +11,7 @@ jobs:
   displayName: 'Build the React and Flask App'
   steps:
     - checkout: self  # Checkout the repository
+
     - task: NodeTool@0
       inputs:
         versionSpec: '16.x'  # Install Node.js version 16.x
@@ -20,36 +21,31 @@ jobs:
         cd client
         npm install  # Install React dependencies
       displayName: 'Install React dependencies'
+      condition: succeeded()  # This ensures the step only runs if the previous step succeeded
 
     - script: |
         cd client
         npm run build  # Build the React app
       displayName: 'Build React app'
+      condition: succeeded()  # Only run if 'Install React dependencies' step succeeded
 
     - script: |
         mkdir -p app/static  # Ensure static folder exists
         cp -r client/build/* app/static/  # Move build files to Flask static folder
       displayName: 'Move React build to Flask static'
+      condition: succeeded()  # Only run if 'Build React app' step succeeded
 
-- job: InstallPython
-  displayName: 'Install Python and Flask Dependencies'
-  dependsOn: Build  # This job depends on the completion of the Build job
-  steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.x'  # Install Python version 3.x
+        versionSpec: '3.x'  # Specify the Python version
       displayName: 'Install Python'
 
     - script: |
         python -m venv venv  # Create a virtual environment
         source venv/bin/activate  # Activate the virtual environment
-        pip install -r requirements.txt  # Install Flask dependencies
+        pip install -r requirements.txt  # Install Python dependencies
       displayName: 'Install Flask dependencies'
 
-- job: Deploy
-  displayName: 'Deploy the App to GoDaddy via FTP'
-  dependsOn: InstallPython  # This job depends on the completion of the InstallPython job
-  steps:
     - script: |
         lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) ftp://ftp.anthonybturner.com -e "
           mirror -R app /home/fmua7eh7xba3/app; 
