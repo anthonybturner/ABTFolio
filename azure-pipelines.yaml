@@ -42,9 +42,12 @@ steps:
     displayName: 'Install Flask dependencies'
 
   - script: |
-      lftp -u fmua7eh7xba3@anthonybturner.com,H4zch3m2025! anthonybturner.com -e "
+      lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) $(FTP_HOST) -e "
         mirror -R app /home/fmua7eh7xba3/app; 
         mirror -R client/build /home/fmua7eh7xba3/app/static; 
         quit"
-
+    env:
+      FTP_HOST: $(FTP_HOST)
+      FTP_USERNAME: $(FTP_USERNAME)
+      FTP_PASSWORD: $(FTP_PASSWORD)
     displayName: 'Deploy Flask app to GoDaddy via FTP'
