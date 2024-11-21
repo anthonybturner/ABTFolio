@@ -42,7 +42,7 @@ steps:
     displayName: 'Install Flask dependencies'
 
   - script: |
-      lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) ftp://ftp.anthonybturner.com -e "
+      lftp -u admin,admin ftp://ftp.anthonybturner.com -e "
         mirror -R app /home/fmua7eh7xba3/app; 
         mirror -R client/build /home/fmua7eh7xba3/app/static; 
         quit"
