@@ -5,3 +5,7 @@ trigger:
 
 pool:
   vmImage: 'ubuntu-latest'
+
+steps:
+  - task: Checkout@1
+    displayName: 'Checkout repository'
