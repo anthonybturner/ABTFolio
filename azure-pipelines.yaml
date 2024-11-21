@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - main  # Trigger pipeline for 'main' branch
+      - main  # Trigger the pipeline for 'main' branch
 
 pool:
   vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image
@@ -10,7 +10,8 @@ jobs:
 - job: Build_and_Deploy
   displayName: 'Build and Deploy React and Flask App'
   steps:
-  - checkout: self
+    # Step 1: Checkout the repository
+  - checkout: self  # Ensure the repository is checked out
 
   # Step 2: Install Node.js and React dependencies
   - task: NodeTool@0
@@ -29,7 +30,7 @@ jobs:
       npm run build
     displayName: 'Build React app'
 
-  # Step 4: Copy React build to Flask static directory
+  # Step 4: Move React build to Flask static directory
   - script: |
       mkdir -p app/static  # Ensure the static folder exists
       cp -r client/build/* app/static/
@@ -50,7 +51,6 @@ jobs:
   # Step 6: Deploy Flask app to GoDaddy via FTP
   - script: |
       lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) ftp://ftp.anthonybturner.com -e "
-        set ftp:ssl-allow no;  # Disable SSL if needed
         mirror -R app /home/fmua7eh7xba3/app; 
         mirror -R client/build /home/fmua7eh7xba3/app/static; 
         quit"
