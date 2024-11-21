@@ -9,22 +9,7 @@ pool:
 steps:
   - task: Checkout@1
     displayName: 'Checkout repository'
-
-  - script: |
-      mkdir -p app/static
-    displayName: 'Move React build to Flask static'
-
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.x'
-    displayName: 'Install Python'
-
-  - script: |
-      python -m venv venv
-      source venv/bin/activate
-      pip install -r requirements.txt
-    displayName: 'Install Flask dependencies'
-
+    
   - script: |
       lftp -u admin,admin ftp://ftp.anthonybturner.com -e "
         mirror -R app /home/fmua7eh7xba3/app; 
