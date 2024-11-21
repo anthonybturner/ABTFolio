@@ -1,5 +1,7 @@
 trigger:
-- main  # Trigger the pipeline when changes are pushed to the 'main' branch
+  branches:
+    include:
+      - main  # Trigger pipeline for 'main' branch
 
 pool:
   vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image
@@ -13,45 +15,48 @@ jobs:
   - task: Checkout@1
     displayName: 'Checkout repository'
 
-  # Step 2: Install dependencies for React
+  # Step 2: Install Node.js and React dependencies
   - task: NodeTool@0
     inputs:
-      versionSpec: '16.x'  # Specify the Node.js version
+      versionSpec: '16.x'
     displayName: 'Install Node.js'
 
   - script: |
-      cd client  # Go to the React client directory
-      npm install  # Install React dependencies
+      cd client
+      npm install
     displayName: 'Install React dependencies'
 
   # Step 3: Build React app
   - script: |
-      cd client  # Go to the React client directory
-      npm run build  # Build the React app (creates the build folder)
+      cd client
+      npm run build
     displayName: 'Build React app'
 
-  # Step 4: Copy build contents to Flask static directory
+  # Step 4: Copy React build to Flask static directory
   - script: |
-      cp -r client/build/* app/static/  # Move React build files to Flask static directory
+      mkdir -p app/static  # Ensure the static folder exists
+      cp -r client/build/* app/static/
     displayName: 'Move React build to Flask static'
 
-  # Step 5: Install Python dependencies (Flask, etc.)
+  # Step 5: Install Python and Flask dependencies
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.x'  # Specify the Python version
+      versionSpec: '3.x'
     displayName: 'Install Python'
 
   - script: |
-      python -m venv venv  # Create a virtual environment
-      source venv/bin/activate  # Activate the virtual environment
-      pip install -r requirements.txt  # Install Python dependencies
-    displayName: 'Install Python dependencies'
+      python -m venv venv
+      source venv/bin/activate
+      pip install -r requirements.txt
+    displayName: 'Install Flask dependencies'
 
-  # Step 6: Deploy Flask app via FTP to GoDaddy
+  # Step 6: Deploy Flask app to GoDaddy via FTP
   - script: |
-      # Use lftp to deploy the app to GoDaddy via FTP
-      lftp -u admin,f*Gb6GEY92 ftp://ftp.anthonybturner.com -e "
+      lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) ftp://ftp.anthonybturner.com -e "
         mirror -R app /home/fmua7eh7xba3/app; 
         mirror -R client/build /home/fmua7eh7xba3/app/static; 
         quit"
+    env:
+      FTP_USERNAME: $(FTP_USERNAME)
+      FTP_PASSWORD: $(FTP_PASSWORD)
     displayName: 'Deploy Flask app to GoDaddy via FTP'
