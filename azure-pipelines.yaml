@@ -10,10 +10,7 @@ jobs:
 - job: Build_and_Deploy
   displayName: 'Build and Deploy React and Flask App'
   steps:
-
-  # Step 1: Checkout the repository
-  - task: Checkout@1
-    displayName: 'Checkout repository'
+  - checkout: self
 
   # Step 2: Install Node.js and React dependencies
   - task: NodeTool@0
@@ -53,6 +50,7 @@ jobs:
   # Step 6: Deploy Flask app to GoDaddy via FTP
   - script: |
       lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) ftp://ftp.anthonybturner.com -e "
+        set ftp:ssl-allow no;  # Disable SSL if needed
         mirror -R app /home/fmua7eh7xba3/app; 
         mirror -R client/build /home/fmua7eh7xba3/app/static; 
         quit"
