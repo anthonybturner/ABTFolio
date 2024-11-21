@@ -1,36 +1,52 @@
 trigger:
   branches:
     include:
-      - main  # Trigger pipeline for 'main' branch
+      - main
 
 pool:
-  vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image
+  vmImage: 'ubuntu-latest'
 
-jobs:
-- job: Build
-  displayName: 'Build the React and Flask App'
-  steps:
-    - checkout: self  # Checkout the repository
+steps:
+  - task: Checkout@1
+    displayName: 'Checkout repository'
 
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '16.x'  # Install Node.js version 16.x
-      displayName: 'Install Node.js'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '16.x'
+    displayName: 'Install Node.js'
 
-    - script: |
-        cd client
-        npm install  # Install React dependencies
-      displayName: 'Install React dependencies'
-      condition: succeeded()  # This ensures the step only runs if the previous step succeeded
+  - script: |
+      cd client
+      npm install
+    displayName: 'Install React dependencies'
 
-    
+  - script: |
+      cd client
+      npm run build
+    displayName: 'Build React app'
 
-    - script: |
-        lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) ftp://ftp.anthonybturner.com -e "
-          mirror -R app /home/fmua7eh7xba3/app; 
-          mirror -R client/build /home/fmua7eh7xba3/app/static; 
-          quit"
-      env:
-        FTP_USERNAME: $(FTP_USERNAME)
-        FTP_PASSWORD: $(FTP_PASSWORD)
-      displayName: 'Deploy Flask app to GoDaddy via FTP'
+  - script: |
+      mkdir -p app/static
+      cp -r client/build/* app/static/
+    displayName: 'Move React build to Flask static'
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+    displayName: 'Install Python'
+
+  - script: |
+      python -m venv venv
+      source venv/bin/activate
+      pip install -r requirements.txt
+    displayName: 'Install Flask dependencies'
+
+  - script: |
+      lftp -u $(FTP_USERNAME),$(FTP_PASSWORD) ftp://ftp.anthonybturner.com -e "
+        mirror -R app /home/fmua7eh7xba3/app; 
+        mirror -R client/build /home/fmua7eh7xba3/app/static; 
+        quit"
+    env:
+      FTP_USERNAME: $(FTP_USERNAME)
+      FTP_PASSWORD: $(FTP_PASSWORD)
+    displayName: 'Deploy Flask app to GoDaddy via FTP'
