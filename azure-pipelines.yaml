@@ -1,0 +1,57 @@
+trigger:
+- main  # Trigger the pipeline when changes are pushed to the 'main' branch
+
+pool:
+  vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image
+
+jobs:
+- job: Build_and_Deploy
+  displayName: 'Build and Deploy React and Flask App'
+  steps:
+
+  # Step 1: Checkout the repository
+  - task: Checkout@1
+    displayName: 'Checkout repository'
+
+  # Step 2: Install dependencies for React
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '16.x'  # Specify the Node.js version
+    displayName: 'Install Node.js'
+
+  - script: |
+      cd client  # Go to the React client directory
+      npm install  # Install React dependencies
+    displayName: 'Install React dependencies'
+
+  # Step 3: Build React app
+  - script: |
+      cd client  # Go to the React client directory
+      npm run build  # Build the React app (creates the build folder)
+    displayName: 'Build React app'
+
+  # Step 4: Copy build contents to Flask static directory
+  - script: |
+      cp -r client/build/* app/static/  # Move React build files to Flask static directory
+    displayName: 'Move React build to Flask static'
+
+  # Step 5: Install Python dependencies (Flask, etc.)
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'  # Specify the Python version
+    displayName: 'Install Python'
+
+  - script: |
+      python -m venv venv  # Create a virtual environment
+      source venv/bin/activate  # Activate the virtual environment
+      pip install -r requirements.txt  # Install Python dependencies
+    displayName: 'Install Python dependencies'
+
+  # Step 6: Deploy Flask app via FTP to GoDaddy
+  - script: |
+      # Use lftp to deploy the app to GoDaddy via FTP
+      lftp -u admin,f*Gb6GEY92 ftp://ftp.anthonybturner.com -e "
+        mirror -R app /home/fmua7eh7xba3/app; 
+        mirror -R client/build /home/fmua7eh7xba3/app/static; 
+        quit"
+    displayName: 'Deploy Flask app to GoDaddy via FTP'
