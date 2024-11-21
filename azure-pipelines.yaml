@@ -7,7 +7,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-  - task: Checkout@2
+  - task: Checkout@1
     displayName: 'Checkout repository'
 
   - task: NodeTool@0
